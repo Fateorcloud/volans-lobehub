@@ -11,11 +11,12 @@ load_env
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/Serve}"
 log "Rendering project files into $DEPLOY_DIR"
 
-mkdir -p "$DEPLOY_DIR/backup" "$DEPLOY_DIR/scripts" "$DEPLOY_DIR/systemd"
+mkdir -p "$DEPLOY_DIR/backup" "$DEPLOY_DIR/scripts" "$DEPLOY_DIR/systemd" "$DEPLOY_DIR/open-webui_data/patches"
 
 install_template "$PROJECT_ROOT/templates/docker-compose.yml" "$DEPLOY_DIR/docker-compose.yml" 0644
 install_template "$PROJECT_ROOT/templates/init.sql" "$DEPLOY_DIR/init.sql" 0644
 install_template "$PROJECT_ROOT/templates/Caddyfile.image" "$DEPLOY_DIR/Caddyfile.image" 0644
+install_template "$PROJECT_ROOT/templates/patch_safe_web_loader.py" "$DEPLOY_DIR/open-webui_data/patches/patch_safe_web_loader.py" 0644
 install_template "$PROJECT_ROOT/templates/99-volans-autofill.sh" "$DEPLOY_DIR/scripts/99-volans-autofill.sh" 0755
 install_template "$PROJECT_ROOT/.env.example" "$DEPLOY_DIR/.env.example" 0644
 

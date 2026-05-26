@@ -114,13 +114,14 @@ OPENWEBUI_ENABLE_DIRECT_CONNECTIONS=false
 OPENWEBUI_ENABLE_API_KEYS=false
 OPENWEBUI_USER_PERMISSIONS_FEATURES_API_KEYS=false
 OPENWEBUI_ENABLE_WEB_SEARCH=true
-OPENWEBUI_WEB_SEARCH_ENGINE=duckduckgo
-OPENWEBUI_BYPASS_WEB_SEARCH_WEB_LOADER=true
-OPENWEBUI_BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL=true
+OPENWEBUI_WEB_SEARCH_ENGINE=brave
+OPENWEBUI_BRAVE_SEARCH_API_KEY=CHANGE_ME_BRAVE_SEARCH_API_KEY
+OPENWEBUI_BYPASS_WEB_SEARCH_WEB_LOADER=false
+OPENWEBUI_BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL=false
 OPENWEBUI_USER_PERMISSIONS_FEATURES_WEB_SEARCH=true
 ```
 
-Web Search 默认使用 `duckduckgo`，这是最简单的无 key 方案。默认绕过网页正文加载和向量检索，直接用搜索结果标题/摘要作为上下文和引用来源，避免搜索引擎能返回结果但网页抓取失败导致聊天里显示“未找到引用来源”。普通用户可以使用搜索按钮/联网搜索，但仍不能自填外部连接或个人 API Key。Open WebUI 容器不配置代理，搜索走 HK VPS 默认出口；NewAPI 调模型仍走既有 NAT VPS 代理链路。
+Web Search 默认使用 Brave Search API。普通用户可以使用搜索按钮/联网搜索，但仍不能自填外部连接或个人 API Key。默认保留网页正文加载和向量检索；模板会在 Open WebUI 容器启动时应用 `patch_safe_web_loader.py`，修复当前 `safe_web` 异步正文抓取中重复传递 `allow_redirects` 导致正文为空的问题。Open WebUI 容器不配置代理，搜索走 HK VPS 默认出口；NewAPI 调模型仍走既有 NAT VPS 代理链路。
 
 `NEWAPI_MASTER_KEY` 必须填 NewAPI 后台创建的有效 OpenAI 兼容 token，通常以 `sk-` 开头。它是 Open WebUI 连接 `http://newapi:3000/v1` 的服务 token，不是 NewAPI 管理后台密码，也不能使用已经删除、停用、额度耗尽或分组无模型权限的 token。
 

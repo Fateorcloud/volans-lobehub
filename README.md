@@ -77,7 +77,8 @@ OPENWEBUI_ENABLE_DIRECT_CONNECTIONS=false
 OPENWEBUI_ENABLE_API_KEYS=false
 OPENWEBUI_USER_PERMISSIONS_FEATURES_API_KEYS=false
 OPENWEBUI_ENABLE_WEB_SEARCH=true
-OPENWEBUI_WEB_SEARCH_ENGINE=duckduckgo
+OPENWEBUI_WEB_SEARCH_ENGINE=brave
+OPENWEBUI_BRAVE_SEARCH_API_KEY=CHANGE_ME_BRAVE_SEARCH_API_KEY
 OPENWEBUI_BYPASS_WEB_SEARCH_WEB_LOADER=false
 OPENWEBUI_BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL=false
 OPENWEBUI_USER_PERMISSIONS_FEATURES_WEB_SEARCH=true
@@ -85,7 +86,29 @@ OPENWEBUI_USER_PERMISSIONS_FEATURES_WEB_SEARCH=true
 
 注意：`NEWAPI_MASTER_KEY` 不是 NewAPI 后台管理密钥，也不是随便生成的占位字符串。它必须是在 NewAPI 后台创建的、状态为启用的 OpenAI 兼容 token，格式通常是 `sk-...`。Open WebUI 会用它访问 `http://newapi:3000/v1/models` 和发起聊天请求；如果 token 被删除、停用、额度归零或分组没有模型，管理员和普通用户都会看不到模型。
 
-Web Search 默认使用 `duckduckgo`，不需要额外搜索 API Key。默认保留网页正文抓取和检索，不绕过 loader，也不只依赖搜索摘要。当前模板会在 Open WebUI 容器启动时应用一个很小的 `safe_web` 兼容补丁，修复异步正文抓取里重复传递 `allow_redirects` 导致正文为空的问题。Open WebUI 自身不配置 `HTTP_PROXY/HTTPS_PROXY`，因此搜索默认走 HK VPS 出口；NewAPI 调上游模型仍按 NAT VPS 代理链路走。
+Web Search 默认使用 Brave Search API，新闻和时效检索质量明显强于无 key 的 DDGS/DuckDuckGo。默认保留网页正文抓取和检索，不绕过 loader，也不只依赖搜索摘要。当前模板会在 Open WebUI 容器启动时应用一个很小的 `safe_web` 兼容补丁，修复异步正文抓取里重复传递 `allow_redirects` 导致正文为空的问题。Open WebUI 自身不配置 `HTTP_PROXY/HTTPS_PROXY`，因此搜索默认走 HK VPS 出口；NewAPI 调上游模型仍按 NAT VPS 代理链路走。
+
+不要把 Brave Search API Key 提交到 Git。部署时只写入服务器 `.env`：
+
+```bash
+cd /opt/Serve
+sudo nano .env
+```
+
+填入：
+
+```env
+OPENWEBUI_WEB_SEARCH_ENGINE=brave
+OPENWEBUI_BRAVE_SEARCH_API_KEY=你的 Brave Search API Key
+OPENWEBUI_WEB_SEARCH_RESULT_COUNT=5
+```
+
+然后重建：
+
+```bash
+docker compose config --quiet
+docker compose up -d --force-recreate open-webui
+```
 ## 当前架构
 
 ```text
