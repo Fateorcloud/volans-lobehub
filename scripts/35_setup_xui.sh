@@ -17,7 +17,7 @@ fi
 require_env_not_placeholder XUI_ADMIN_USERNAME
 require_env_not_placeholder XUI_ADMIN_PASSWORD
 
-XUI_DEPLOY_DIR="${XUI_DEPLOY_DIR:-/opt/lobehub-xui}"
+XUI_DEPLOY_DIR="${XUI_DEPLOY_DIR:-/opt/xui}"
 log "Rendering and starting optional xui component in $XUI_DEPLOY_DIR"
 
 mkdir -p "$XUI_DEPLOY_DIR"
