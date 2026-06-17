@@ -67,8 +67,8 @@ rustfs_data_*.tar.gz
 在新服务器部署空栈：
 
 ```bash
-git clone https://github.com/<your-name>/volans-ai-platform-deploy.git
-cd volans-ai-platform-deploy
+git clone https://github.com/<your-name>/volans-lobehub-deploy.git
+cd volans-lobehub-deploy
 cp .env.example .env
 nano .env
 sudo bash deploy.sh fresh --yes
