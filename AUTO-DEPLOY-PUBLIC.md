@@ -31,15 +31,9 @@ LobeHub
 ```
 
 The default deployment does not install NewAPI, Open WebUI, GPT Image
-Playground, Caddy image site, xui, or NAT proxy.
-
-xui and NAT are retained only as optional network components:
-
-```bash
-sudo bash deploy.sh xui --yes
-sudo bash deploy.sh nat-proxy --yes
-sudo bash deploy.sh network --yes
-```
+Playground, Caddy image site, xui, or NAT proxy. xui/NAT belongs in a separate
+network deployment project and should use a separate server directory such as
+`/opt/xui`.
 
 ## Fresh Server Bootstrap
 
@@ -86,29 +80,10 @@ DEEPSEEK_API_KEY
 OPENROUTER_API_KEY
 ```
 
-## Optional xui/NAT
+## External Egress Proxy
 
-Edit `.env` only if needed:
-
-```env
-ENABLE_XUI=true
-XUI_ADMIN_USERNAME=CHANGE_ME_XUI_ADMIN
-XUI_ADMIN_PASSWORD=CHANGE_ME_XUI_PASSWORD
-
-ENABLE_NAT_PROXY=true
-NAT_SSH_HOST=<nat-server-hostname>
-NAT_SSH_PORT=22
-NAT_SSH_USER=root
-NAT_SSH_KEY_PATH=/root/.ssh/nat_ed25519
-```
-
-Then run:
-
-```bash
-sudo bash deploy.sh network --yes
-```
-
-If LobeHub provider calls should use that proxy, set:
+If LobeHub provider calls should use a proxy managed outside this repository,
+set:
 
 ```env
 HTTP_PROXY=http://127.0.0.1:7890
@@ -182,7 +157,7 @@ Do a restore drill before treating the backup chain as reliable.
 
 - `.env` or `.env.*`
 - provider API keys or LobeHub secrets
-- SSH keys, NAT hostnames, xui credentials
+- SSH keys or private proxy credentials
 - `postgres_data/`, `redis_data/`, `rustfs_data/`, `rustfs_logs/`
 - backup archives
 - private deployment notes

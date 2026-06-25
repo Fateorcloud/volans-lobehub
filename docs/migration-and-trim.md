@@ -13,18 +13,18 @@
 | RustFS/S3 | `rustfs_data/` | 是 | 上传文件、图片和知识库对象 |
 | SearXNG | `lobe-searxng` | 可选 | 联网搜索；不用搜索时可停用 |
 | 旧 NewAPI/Open WebUI/图站 | GitHub `codex/legacy-ai-stack-backup` | 否 | 已备份，当前项目不再部署 |
-| xui/NAT | `deploy.sh xui` / `deploy.sh nat-proxy` | 否 | 独立可选网络组件，不属于 AI 平台 |
+| xui/NAT | 独立部署项目 | 否 | 不属于本仓库，由独立网络项目维护 |
 | Notes/static sites | 独立目录和 Nginx | 无关 | 不属于本轮 AI 平台裁剪 |
 
 ## 从旧平台裁剪
 
 第一轮不要删除旧目录和 volume。推荐顺序：
 
-1. 确认旧 NewAPI/Open WebUI/图站/xui/NAT 链路已经备份到 GitHub 分支 `codex/legacy-ai-stack-backup`。
+1. 确认旧 NewAPI/Open WebUI/图站链路已经备份到 GitHub 分支 `codex/legacy-ai-stack-backup`。
 2. 保留旧服务器 `/opt/Serve`，不要自动删除 volume。
 3. 新建 `/opt/lobehub` 并部署新栈。
 4. 通过 SSH 隧道验证 LobeHub UI、模型调用、会话持久化和上传。
-5. 如果仍需要 xui/NAT，使用 `deploy.sh xui` 和 `deploy.sh nat-proxy` 单独安装。
+5. 如果仍需要 xui/NAT，使用独立网络项目部署到 `/opt/xui`。
 6. 验证通过后，只停止旧容器，不删除数据。
 7. 观察一段时间后，再手动决定是否归档或删除旧栈。
 

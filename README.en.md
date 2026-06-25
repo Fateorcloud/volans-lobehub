@@ -6,11 +6,11 @@ This is a small self-hosting toolkit for LobeHub. The default stack is now only
 `LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG`, designed for a
 local-only first test phase.
 
-The previous NewAPI, Open WebUI, GPT Image Playground, and Caddy image site have
-been removed from the current project. The old deployable chain is backed up in
-the GitHub repo `Fateorcloud/volans-ai-platform-deploy`, branch `codex/legacy-ai-stack-backup`. xui and the NAT egress proxy
-are retained as explicit optional network components, but they are not part of
-the LobeHub AI platform core stack.
+The previous NewAPI, Open WebUI, GPT Image Playground, Caddy image site, xui,
+and NAT egress proxy have been removed from the current project. The old
+deployable chain is backed up in the GitHub repo
+`Fateorcloud/volans-ai-platform-deploy`, branch
+`codex/legacy-ai-stack-backup`. xui/NAT now lives in a separate deploy project.
 
 ## Architecture
 
@@ -25,10 +25,6 @@ LobeHub
   -> 127.0.0.1:9000  RustFS
   -> 127.0.0.1:18080 SearXNG
   -> provider APIs configured in .env
-
-Optional network components
-  -> xui side stack, installed only by deploy.sh xui
-  -> NAT egress proxy, installed only by deploy.sh nat-proxy
 ```
 
 LobeHub uses host networking so `S3_ENDPOINT=http://127.0.0.1:9000` works for
@@ -106,16 +102,6 @@ sudo bash deploy.sh backup
 sudo bash deploy.sh repair --yes
 ```
 
-Optional network components are explicit:
-
-```bash
-sudo bash deploy.sh xui --yes
-sudo bash deploy.sh nat-proxy --yes
-sudo bash deploy.sh network --yes
-```
-
-`fresh` and `repair` do not install xui or NAT proxy components automatically.
-
 Deploy directory:
 
 ```text
@@ -161,7 +147,6 @@ full guide: [Public access: Cloudflare Tunnel + domain](docs/public-access.md).
 - [Deployment flow](docs/deployment.md)
 - [Public access (Cloudflare Tunnel + domain)](docs/public-access.md)
 - [Operations](docs/operations.md)
-- [Optional xui/NAT network components](docs/network-components.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Migration and trim](docs/migration-and-trim.md)
 - [Open-source release checklist](docs/open-source-release.md)

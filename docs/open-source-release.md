@@ -6,7 +6,7 @@ Use this checklist before publishing or updating the public repository.
 
 - `README.md` and `README.en.md` describe the LobeHub local-only deployment.
 - NewAPI, Open WebUI, and image-site files are absent from the current branch.
-- Optional xui/NAT files are documented as independent network components only.
+- xui/NAT files are absent from this LobeHub-only repository.
 - `.env.example` contains placeholders only.
 - `.gitignore` excludes generated credentials, databases, backups, and logs.
 - `LICENSE` is present.

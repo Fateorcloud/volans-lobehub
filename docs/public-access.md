@@ -44,6 +44,9 @@ RUSTFS_CORS_ALLOWED_ORIGINS=https://chat.example.com
 # 准入白名单：只有这些邮箱/域名能注册登录（留空=任何人可注册）
 AUTH_ALLOWED_EMAILS=you@example.com,teammate@example.com
 
+# Hide the first-run "add a few agents" onboarding screen while keeping Market enabled.
+FEATURE_FLAGS=-welcome_suggest
+
 # 服务端共享 key 池（所有登录用户可用；用户也可在设置里加自己的私有 key）
 API_KEY_SELECT_MODE=turn
 DEEPSEEK_API_KEY=sk-xxx           # 多把可逗号分隔：sk-aaa,sk-bbb
