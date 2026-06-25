@@ -30,6 +30,7 @@ rustfs_logs/
 backup/
 server-backups/
 clash-work/
+.claude/
 
 __pycache__/
 .DS_Store
