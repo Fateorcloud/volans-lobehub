@@ -5,27 +5,48 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 fail=0
 
-scan_pattern() {
-  local name="$1"
-  local pattern="$2"
-  local output
+# Only scan files that would actually be published: git-tracked plus untracked
+# files NOT covered by .gitignore. This keeps local-only private files (.env,
+# AUTO-DEPLOY-PRIVATE.md, CONTEXT.md, server-backups/, ...) out of the scan, so
+# real production domains/IPs living in those don't trigger false positives.
+# Falls back to a filesystem walk when run outside a git work tree (e.g. from a
+# downloaded tarball).
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  USE_GIT=1
+else
+  USE_GIT=0
+fi
 
-  output="$(
-    find "$ROOT" \
-      -path "$ROOT/.git" -prune -o \
-      -path "$ROOT/postgres_data" -prune -o \
-      -path "$ROOT/redis_data" -prune -o \
-      -path "$ROOT/rustfs_data" -prune -o \
-      -path "$ROOT/rustfs_logs" -prune -o \
-      -path "$ROOT/backup" -prune -o \
+list_files() {
+  if [[ "$USE_GIT" == 1 ]]; then
+    git ls-files -z --cached --others --exclude-standard
+  else
+    find . \
+      -path ./.git -prune -o \
+      -path ./postgres_data -prune -o \
+      -path ./redis_data -prune -o \
+      -path ./rustfs_data -prune -o \
+      -path ./rustfs_logs -prune -o \
+      -path ./backup -prune -o \
+      -path ./server-backups -prune -o \
       -type f \
       ! -name '*.zip' \
       ! -name '*.tgz' \
       ! -name '*.tar.gz' \
       ! -name '*.7z' \
       ! -name '*.rar' \
-      -print0 |
-      xargs -0 grep -nEI "$pattern" 2>/dev/null || true
+      -print0
+  fi
+}
+
+scan_pattern() {
+  local name="$1"
+  local pattern="$2"
+  local output
+
+  output="$(
+    cd "$ROOT" &&
+    list_files | xargs -0 grep -nEI "$pattern" 2>/dev/null || true
   )"
 
   if [[ -n "$output" ]]; then
