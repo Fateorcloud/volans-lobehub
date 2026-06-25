@@ -2,24 +2,25 @@
 
 English | [Chinese](README.md)
 
-This is a small self-hosting toolkit for LobeHub. The default stack is now only
-`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG`, designed for a
-local-only first test phase.
+A small self-hosting toolkit for LobeHub. It deploys
+`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG` on a single server
+and publishes it on your own domain through a Cloudflare Tunnel (no open ports,
+TLS at the edge).
 
 The previous NewAPI, Open WebUI, GPT Image Playground, Caddy image site, xui,
-and NAT egress proxy have been removed from the current project. The old
-deployable chain is backed up in the GitHub repo
-`Fateorcloud/volans-ai-platform-deploy`, branch
-`codex/legacy-ai-stack-backup`. xui/NAT now lives in a separate deploy project.
+and NAT egress proxy have been removed from this project. The old deployable
+chain is backed up in the GitHub repo `Fateorcloud/volans-ai-platform-deploy`,
+branch `codex/legacy-ai-stack-backup`. xui/NAT now lives in a separate deploy
+project.
 
 ## Architecture
 
 ```text
-Browser over SSH tunnel
-  -> 127.0.0.1:3210  LobeHub
-  -> 127.0.0.1:9000  RustFS S3 API, for uploads
+Browser (HTTPS)
+  -> chat.<domain>  -> Cloudflare Tunnel -> 127.0.0.1:3210  LobeHub
+  -> s3.<domain>    -> Cloudflare Tunnel -> 127.0.0.1:9000  RustFS S3 (uploads)
 
-LobeHub
+LobeHub (on the server)
   -> 127.0.0.1:15432 PostgreSQL / PGVector
   -> 127.0.0.1:16379 Redis
   -> 127.0.0.1:9000  RustFS
@@ -27,11 +28,23 @@ LobeHub
   -> provider APIs configured in .env
 ```
 
-LobeHub uses host networking so `S3_ENDPOINT=http://127.0.0.1:9000` works for
-both the LobeHub server and a browser connected through an SSH tunnel. The data
-services bind to `127.0.0.1` only.
+LobeHub uses host networking so `S3_ENDPOINT` is reachable by both the LobeHub
+server and the browser through the tunnel. All data services bind to `127.0.0.1`
+only and open no public ports — the Cloudflare Tunnel is the single ingress.
 
-## Quick Start
+## Suitable For
+
+- Replacing a heavier AI platform while keeping a modern, persistent front end
+  for yourself or a small team.
+- Gating sign-up to your own domain with an `AUTH_ALLOWED_EMAILS` allowlist.
+- Connecting providers such as OpenAI, Anthropic, Google/Gemini, DeepSeek, and
+  OpenRouter.
+- Restoring later on another server by copying `/opt/lobehub`, `.env`, and backups.
+
+Not for: commercial billing, complex team permissions, API gateway metering, or
+workflow app platforms. Use LibreChat, LiteLLM, or Dify for those.
+
+## Step 1: Deploy on the server
 
 On a fresh Ubuntu 22.04/24.04 VPS:
 
@@ -74,25 +87,28 @@ DEEPSEEK_API_KEY
 OPENROUTER_API_KEY
 ```
 
-## Local Access
+## Step 2: Publish on your domain (Cloudflare Tunnel)
 
-From your local machine:
+Expose the platform on your own domain — no open ports, TLS at the Cloudflare
+edge, faster first paint. Serve the app at `chat.<domain>` and storage at
+`s3.<domain>`, and gate sign-up with `AUTH_ALLOWED_EMAILS`. Set the tunnel and
+public domains in `.env`, then restart:
 
-```bash
-ssh -L 3210:127.0.0.1:3210 -L 9000:127.0.0.1:9000 <server-alias>
+```env
+COMPOSE_PROFILES=tunnel
+CF_TUNNEL_TOKEN=<your tunnel token>
+APP_URL=https://chat.<domain>
+S3_ENDPOINT=https://s3.<domain>
+S3_PUBLIC_DOMAIN=https://s3.<domain>
+RUSTFS_CORS_ALLOWED_ORIGINS=https://chat.<domain>
+AUTH_ALLOWED_EMAILS=you@example.com,teammate@example.com
 ```
 
-Open:
-
-```text
-http://127.0.0.1:3210
-```
-
-RustFS console is available locally at:
-
-```text
-http://127.0.0.1:9001
-```
+For the full walkthrough — create the tunnel, add the two hostnames (origin is
+**HTTP**: `http://127.0.0.1:3210` and `http://127.0.0.1:9000`), start, verify,
+add users / rotate keys — see
+[Public access: Cloudflare Tunnel + domain](docs/public-access.md). When done,
+open `https://chat.<domain>`.
 
 ## Operations
 
@@ -117,6 +133,10 @@ docker compose logs -f lobehub
 docker compose logs -f lobe-rustfs
 ```
 
+> Debug only (optional): before the domain is set up you can reach it over an SSH
+> tunnel — `ssh -L 3210:127.0.0.1:3210 <server-alias>`, then open
+> `http://127.0.0.1:3210`.
+
 ## Backup And Migration
 
 Manual backup:
@@ -134,13 +154,6 @@ Default backup files:
 
 For a second server, copy the private `.env`, restore PostgreSQL, restore RustFS
 data, then run the verification command. Never commit these private artifacts.
-
-## Public Exposure
-
-To open the platform to a group of users, use **Cloudflare Tunnel** (no open
-ports, TLS at the edge, faster first paint): serve the app at `chat.<domain>` and
-storage at `s3.<domain>`, and gate sign-up with `AUTH_ALLOWED_EMAILS`. See the
-full guide: [Public access: Cloudflare Tunnel + domain](docs/public-access.md).
 
 ## More Docs
 

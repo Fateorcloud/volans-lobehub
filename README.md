@@ -2,44 +2,44 @@
 
 [English](README.en.md) | 简体中文
 
-这是一个面向个人或小团队的 LobeHub 自部署模板。它把当前默认栈收窄为
-`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG`，第一阶段只做
-服务器本机访问测试，不默认发布公网域名。
+面向个人或小团队的 LobeHub 自部署模板：在一台服务器上部署
+`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG`，并通过你自己的域名
+（Cloudflare Tunnel，不开公网端口、TLS 在边缘完成）公开访问。
 
-旧的 NewAPI、Open WebUI、GPT Image Playground、Caddy 图站、xui 和 NAT 出站代理不再属于当前项目。
-这套旧链路已经备份在 GitHub 仓库 `Fateorcloud/volans-ai-platform-deploy` 的 `codex/legacy-ai-stack-backup` 分支，需要复用时从该
-分支恢复。xui/NAT 现在作为独立部署项目维护，不属于 LobeHub AI 平台核心栈。
+旧的 NewAPI、Open WebUI、GPT Image Playground、Caddy 图站、xui 和 NAT 出站代理不再属于本项目。
+这套旧链路已经备份在 GitHub 仓库 `Fateorcloud/volans-ai-platform-deploy` 的
+`codex/legacy-ai-stack-backup` 分支，需要复用时从该分支恢复。xui/NAT 现在作为独立部署项目维护，
+不属于 LobeHub AI 平台核心栈。
 
 ## 架构
 
 ```text
-Browser over SSH tunnel
-  -> 127.0.0.1:3210  LobeHub
-  -> 127.0.0.1:9000  RustFS S3 API, for uploads
+浏览器（HTTPS）
+  -> chat.<域名>  -> Cloudflare Tunnel -> 127.0.0.1:3210  LobeHub
+  -> s3.<域名>    -> Cloudflare Tunnel -> 127.0.0.1:9000  RustFS S3（文件上传）
 
-LobeHub
+LobeHub（服务器本机）
   -> 127.0.0.1:15432 PostgreSQL / PGVector
   -> 127.0.0.1:16379 Redis
   -> 127.0.0.1:9000  RustFS
   -> 127.0.0.1:18080 SearXNG
-  -> provider APIs configured in .env
+  -> .env 中配置的模型供应商 API
 ```
 
-LobeHub 容器使用 host network，是为了让 `S3_ENDPOINT=http://127.0.0.1:9000`
-同时对 LobeHub 服务端和通过 SSH 隧道访问的浏览器可达。其他持久化服务只映射到
-`127.0.0.1`。
+LobeHub 容器使用 host network，使 `S3_ENDPOINT` 同时对 LobeHub 服务端和经隧道访问的浏览器可达；
+其余持久化服务只绑定 `127.0.0.1`，不开任何公网端口——Cloudflare Tunnel 是唯一入口。
 
 ## 适合场景
 
-- 你想先替换复杂 AI 平台，保留一个现代、可持久化的前端。
-- 你暂时只给自己使用，通过 SSH 隧道访问，不先开放公网。
+- 你想替换复杂 AI 平台，保留一个现代、可持久化的前端，给自己或小团队使用。
+- 你希望通过自己的域名 + 白名单（`AUTH_ALLOWED_EMAILS`）控制谁能注册登录。
 - 你希望接入 OpenAI、Anthropic、Google/Gemini、DeepSeek、OpenRouter 等供应商。
 - 你希望将来能把 `/opt/lobehub`、`.env` 和备份复制到另一台服务器恢复。
 
 不适合：需要商业计费、复杂团队权限、API 网关计量或工作流应用平台的场景。那些需求
 应另行选 LibreChat、LiteLLM 或 Dify。
 
-## 快速部署
+## 第一步：在服务器部署
 
 在一台新的 Ubuntu 22.04/24.04 VPS 上：
 
@@ -65,10 +65,10 @@ SEARXNG_SECRET
 生成示例：
 
 ```bash
-# KEY_VAULTS_SECRET and AUTH_SECRET
+# KEY_VAULTS_SECRET 和 AUTH_SECRET
 openssl rand -base64 32
 
-# POSTGRES_PASSWORD, RUSTFS_SECRET_KEY, and SEARXNG_SECRET can use hex
+# POSTGRES_PASSWORD、RUSTFS_SECRET_KEY、SEARXNG_SECRET 可用 hex
 openssl rand -hex 32
 ```
 
@@ -82,25 +82,26 @@ DEEPSEEK_API_KEY
 OPENROUTER_API_KEY
 ```
 
-## 本机访问
+## 第二步：用域名公开访问（Cloudflare Tunnel）
 
-部署完成后，在本地电脑建立 SSH 隧道：
+把平台发布到你自己的域名：不开公网端口、TLS 在 Cloudflare 边缘完成、首屏更快。App 走
+`chat.<域名>`、文件存储走 `s3.<域名>`，用 `AUTH_ALLOWED_EMAILS` 白名单控制谁能注册。
+在 `.env` 配好隧道与公开域名后重启服务即可：
 
-```bash
-ssh -L 3210:127.0.0.1:3210 -L 9000:127.0.0.1:9000 <server-alias>
+```env
+COMPOSE_PROFILES=tunnel
+CF_TUNNEL_TOKEN=<你的隧道 token>
+APP_URL=https://chat.<域名>
+S3_ENDPOINT=https://s3.<域名>
+S3_PUBLIC_DOMAIN=https://s3.<域名>
+RUSTFS_CORS_ALLOWED_ORIGINS=https://chat.<域名>
+AUTH_ALLOWED_EMAILS=you@example.com,teammate@example.com
 ```
 
-打开：
-
-```text
-http://127.0.0.1:3210
-```
-
-如果要检查 RustFS：
-
-```text
-http://127.0.0.1:9001
-```
+建隧道、加两个主机名（回源填 **HTTP**：`http://127.0.0.1:3210`、`http://127.0.0.1:9000`）、
+启动、验证、加人/换 key 的完整步骤见
+[公开部署：Cloudflare Tunnel + 域名](docs/public-access.md)。配置完成后浏览器打开
+`https://chat.<域名>` 即可使用。
 
 ## 运维命令
 
@@ -124,6 +125,9 @@ docker compose ps
 docker compose logs -f lobehub
 docker compose logs -f lobe-rustfs
 ```
+
+> 仅调试用（可选）：域名还没配好前，可临时用 SSH 隧道访问
+> `ssh -L 3210:127.0.0.1:3210 <server-alias>`，再打开 `http://127.0.0.1:3210`。
 
 ## 备份与迁移
 
@@ -149,12 +153,6 @@ RustFS 备份
 ```
 
 不要把这些文件提交到 Git。
-
-## 公网发布
-
-要把平台公开给一组用户，推荐用 **Cloudflare Tunnel**（不开公网端口、TLS 在边缘、首屏更快）：
-App 走 `chat.<域名>`、文件存储走 `s3.<域名>`，用 `AUTH_ALLOWED_EMAILS` 白名单控制注册。
-完整步骤见 [公开部署：Cloudflare Tunnel + 域名](docs/public-access.md)。
 
 ## 更多文档
 

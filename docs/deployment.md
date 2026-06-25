@@ -57,31 +57,28 @@ Docker CE
 执行本机端口和服务健康检查
 ```
 
-## 3. 本机访问
+## 3. 公网访问（Cloudflare Tunnel + 域名）
 
-在本地电脑执行：
+通过你自己的域名公开访问：App 走 `chat.<域名>`、文件存储走 `s3.<域名>`，不开公网端口、
+TLS 在 Cloudflare 边缘完成。在 `.env` 配好：
 
-```bash
-ssh -L 3210:127.0.0.1:3210 -L 9000:127.0.0.1:9000 <server-alias>
+```env
+COMPOSE_PROFILES=tunnel
+CF_TUNNEL_TOKEN=<你的隧道 token>
+APP_URL=https://chat.<域名>
+S3_ENDPOINT=https://s3.<域名>
+S3_PUBLIC_DOMAIN=https://s3.<域名>
+RUSTFS_CORS_ALLOWED_ORIGINS=https://chat.<域名>
+AUTH_ALLOWED_EMAILS=you@example.com,teammate@example.com
 ```
 
-访问：
+建隧道、加两个主机名（回源填 **HTTP**：`http://127.0.0.1:3210`、`http://127.0.0.1:9000`）、
+启动、验证、加人/换 key 的完整步骤见 [公开部署](public-access.md)。配置完成后浏览器打开
+`https://chat.<域名>` 即可。
 
-```text
-http://127.0.0.1:3210
-```
-
-如果需要 RustFS 控制台，再加：
-
-```bash
-ssh -L 9001:127.0.0.1:9001 <server-alias>
-```
-
-访问：
-
-```text
-http://127.0.0.1:9001
-```
+> 仅调试用（可选）：域名未配好前，可临时用 SSH 隧道
+> `ssh -L 3210:127.0.0.1:3210 <server-alias>` 访问 `http://127.0.0.1:3210`
+> （需要 RustFS 控制台再加 `-L 9001:127.0.0.1:9001`）。
 
 ## 4. 验证
 
@@ -98,20 +95,8 @@ PostgreSQL / Redis / RustFS 健康检查通过
 http://127.0.0.1:3210 返回 HTTP 响应
 ```
 
-## 5. 后续公网发布
+## 5. 加固与运维
 
-第一阶段不配置公网入口。准备发布时再做：
-
-```text
-chat.example.com -> reverse proxy -> 127.0.0.1:3210
-s3.example.com   -> reverse proxy -> 127.0.0.1:9000
-```
-
-同时更新 `.env`：
-
-```env
-APP_URL=https://chat.example.com
-S3_ENDPOINT=https://s3.example.com
-```
-
-不要在未配置认证和 S3 CORS/访问策略前开放公网。
+公网开放前确认：已设 `AUTH_ALLOWED_EMAILS` 白名单、`RUSTFS_CORS_ALLOWED_ORIGINS` 等于 App
+域名、各密钥均非默认值。日常运维（加人、换 key、备份、重启、排错）见
+[运维手册](operations.md) 与 [排障](troubleshooting.md)。
