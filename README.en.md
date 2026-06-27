@@ -49,8 +49,8 @@ workflow app platforms. Use LibreChat, LiteLLM, or Dify for those.
 On a fresh Ubuntu 22.04/24.04 VPS:
 
 ```bash
-git clone https://github.com/Fateorcloud/volans-lobehub-deploy.git
-cd volans-lobehub-deploy
+git clone https://github.com/Fateorcloud/volans-lobehub.git
+cd volans-lobehub
 cp .env.example .env
 nano .env
 sudo bash deploy.sh fresh --yes
@@ -105,7 +105,7 @@ AUTH_ALLOWED_EMAILS=you@example.com,teammate@example.com
 For the full walkthrough — create the tunnel, add the two hostnames (origin is
 **HTTP**: `http://127.0.0.1:3210` and `http://127.0.0.1:9000`), start, verify,
 add users / rotate keys — see
-[Public access: Cloudflare Tunnel + domain](docs/public-access.md). When done,
+[Public access: Cloudflare Tunnel + domain](docs/public-access.en.md). When done,
 open `https://chat.<domain>`.
 
 ## Operations
@@ -155,12 +155,12 @@ data, then run the verification command. Never commit these private artifacts.
 
 ## More Docs
 
-- [Deployment flow](docs/deployment.md)
-- [Public access (Cloudflare Tunnel + domain)](docs/public-access.md)
-- [Operations](docs/operations.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Migration and trim](docs/migration-and-trim.md)
-- [Open-source release checklist](docs/open-source-release.md)
+- [Deployment flow](docs/deployment.en.md)
+- [Public access (Cloudflare Tunnel + domain)](docs/public-access.en.md)
+- [Operations](docs/operations.en.md)
+- [Troubleshooting](docs/troubleshooting.en.md)
+- [Migration and trim](docs/migration-and-trim.en.md)
+- [Open-source release checklist](docs/open-source-release.en.md)
 
 ## Open Source Safety
 

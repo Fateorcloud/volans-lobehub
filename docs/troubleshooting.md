@@ -1,5 +1,7 @@
 # 排障
 
+[English](troubleshooting.en.md) | 简体中文
+
 ## LobeHub 打不开
 
 检查服务：

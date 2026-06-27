@@ -1,5 +1,7 @@
 # 迁移与裁剪 Runbook
 
+[English](migration-and-trim.en.md) | 简体中文
+
 这份文档用于把 LobeHub 部署迁移到另一台服务器，或从旧 AI 平台裁剪到新的轻量栈。
 文档只使用占位符，不记录真实服务器、token、密码或私有域名。
 
@@ -67,8 +69,8 @@ rustfs_data_*.tar.gz
 在新服务器部署空栈：
 
 ```bash
-git clone https://github.com/<your-name>/volans-lobehub-deploy.git
-cd volans-lobehub-deploy
+git clone https://github.com/Fateorcloud/volans-lobehub.git
+cd volans-lobehub
 cp .env.example .env
 nano .env
 sudo bash deploy.sh fresh --yes

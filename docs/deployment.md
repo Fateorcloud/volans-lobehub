@@ -1,5 +1,7 @@
 # 部署流程
 
+[English](deployment.en.md) | 简体中文
+
 ## 1. 准备 `.env`
 
 ```bash

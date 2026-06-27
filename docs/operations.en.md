@@ -1,8 +1,8 @@
-# 运维手册
+# Operations
 
-[English](operations.en.md) | 简体中文
+English | [简体中文](operations.md)
 
-## 服务状态
+## Service status
 
 ```bash
 cd /opt/lobehub
@@ -13,24 +13,24 @@ docker compose logs -f lobe-rustfs
 docker compose logs -f lobe-searxng
 ```
 
-## 验证
+## Verify
 
 ```bash
 sudo bash deploy.sh verify
-# 或在已部署目录：
+# or, in the deployed directory:
 sudo /opt/lobehub/scripts/healthcheck.sh
 ```
 
-验证脚本会检查：
+The verification script checks:
 
 ```text
-Compose 服务状态
-本机端口是否误绑到公网
-PostgreSQL、Redis、RustFS、SearXNG 基础健康
-LobeHub HTTP 入口
+Compose service status
+whether local ports are wrongly bound to the public interface
+PostgreSQL, Redis, RustFS, SearXNG basic health
+the LobeHub HTTP entry
 ```
 
-## 启停与更新
+## Start, stop, update
 
 ```bash
 cd /opt/lobehub
@@ -39,39 +39,39 @@ docker compose up -d
 docker compose restart lobehub
 ```
 
-更新前建议先备份：
+Back up before updating:
 
 ```bash
 sudo bash /opt/lobehub/backup/lobehub_backup.sh
 ```
 
-## 备份
+## Backup
 
 ```bash
 sudo bash deploy.sh backup
 ```
 
-默认输出：
+Default output:
 
 ```text
 /opt/lobehub/backup/postgres_lobechat_YYYY-MM-DD_HHMMSS.sql.gz
 /opt/lobehub/backup/rustfs_data_YYYY-MM-DD_HHMMSS.tar.gz
 ```
 
-Redis 使用 AOF 持久化，备份脚本会触发一次 `BGSAVE`。
+Redis uses AOF persistence; the backup script also triggers one `BGSAVE`.
 
-## 修复模板文件
+## Repair rendered files
 
 ```bash
 sudo bash deploy.sh repair --yes
 ```
 
-该命令会重新渲染 compose、bucket policy、SearXNG 配置和健康检查脚本，但保留
-已有 `.env` 与数据目录。
+This re-renders the compose file, bucket policy, SearXNG config, and health-check
+script, while preserving the existing `.env` and data directories.
 
-## 常用端口
+## Common ports
 
-本机测试阶段这些端口必须只监听 `127.0.0.1`：
+During the local test phase these ports must listen on `127.0.0.1` only:
 
 ```text
 3210  LobeHub

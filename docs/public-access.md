@@ -1,5 +1,7 @@
 # 公开部署：Cloudflare Tunnel + 域名
 
+[English](public-access.en.md) | 简体中文
+
 默认 `deploy.sh fresh` 只在 `127.0.0.1` 上跑 LobeHub（本地测试阶段）。要把它公开给一组
 用户访问，用 **Cloudflare Tunnel** 最省事：不开公网端口、TLS 在 Cloudflare 边缘完成，
 边缘还顺带做 HTTP/2 + 压缩 + 静态资源缓存（首屏明显更快）。
