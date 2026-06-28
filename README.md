@@ -2,14 +2,18 @@
 
 [English](README.en.md) | 简体中文
 
-面向个人或小团队的 LobeHub 自部署模板：在一台服务器上部署
-`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG`，并通过你自己的域名
-（Cloudflare Tunnel，不开公网端口、TLS 在边缘完成）公开访问。
+在一台服务器上一键自托管 **LobeHub**——现代、开源的多模型 AI 对话平台，并通过你自己的域名
+（Cloudflare Tunnel）安全公开访问。**数据、密钥、域名全在你自己手里。**
 
-旧的 NewAPI、Open WebUI、GPT Image Playground、Caddy 图站、xui 和 NAT 出站代理不再属于本项目。
-这套旧链路已经备份在 GitHub 仓库 `Fateorcloud/volans-ai-platform-deploy` 的
-`codex/legacy-ai-stack-backup` 分支，需要复用时从该分支恢复。xui/NAT 现在作为独立部署项目维护，
-不属于 LobeHub AI 平台核心栈。
+## 优势
+
+- **多模型一站接入**：OpenAI、Anthropic、Google/Gemini、DeepSeek、OpenRouter… 一个界面随时切换。
+- **数据持久、跨设备同步**：会话/用户/配置存在 PostgreSQL，不是浏览器本地——换设备登录即同步。
+- **知识库 / RAG**：PGVector 向量检索，上传文档即可基于内容问答。
+- **附件与图片**：S3 兼容存储（RustFS）+ 浏览器预签名直传，大文件不拖慢对话。
+- **联网搜索**：内置 SearXNG（注重隐私的元搜索）。
+- **多用户 + 准入控制**：邮箱白名单注册；服务端「共享 key 池」+ 用户「个人 BYOK」。
+- **自托管、可迁移**：复制 `/opt/lobehub` + `.env` + 备份即可换机重建。
 
 ## 架构
 
@@ -28,6 +32,15 @@ LobeHub（服务器本机）
 
 LobeHub 容器使用 host network，使 `S3_ENDPOINT` 同时对 LobeHub 服务端和经隧道访问的浏览器可达；
 其余持久化服务只绑定 `127.0.0.1`，不开任何公网端口——Cloudflare Tunnel 是唯一入口。
+
+| 组件 | 作用 |
+|---|---|
+| **LobeHub** | 前端 UI + 服务端/API 主应用 |
+| **PostgreSQL / PGVector** | 持久化会话、用户、配置；向量检索支撑知识库 |
+| **Redis** | 缓存、会话、后台任务状态 |
+| **RustFS（S3 兼容）** | 上传文件/图片的对象存储，支持浏览器直传 |
+| **SearXNG** | 联网搜索（注重隐私的元搜索） |
+| **Cloudflare Tunnel（可选）** | 公开访问：不开端口、TLS 在边缘、首屏更快 |
 
 ## 适合场景
 

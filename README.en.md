@@ -2,16 +2,23 @@
 
 English | [Chinese](README.md)
 
-A small self-hosting toolkit for LobeHub. It deploys
-`LobeHub + PostgreSQL/PGVector + Redis + RustFS/S3 + SearXNG` on a single server
-and publishes it on your own domain through a Cloudflare Tunnel (no open ports,
-TLS at the edge).
+Self-host **LobeHub** — a modern, open-source multi-provider AI chat platform — on
+a single server with one command, and publish it on your own domain through a
+Cloudflare Tunnel. **Your data, your keys, your domain.**
 
-The previous NewAPI, Open WebUI, GPT Image Playground, Caddy image site, xui,
-and NAT egress proxy have been removed from this project. The old deployable
-chain is backed up in the GitHub repo `Fateorcloud/volans-ai-platform-deploy`,
-branch `codex/legacy-ai-stack-backup`. xui/NAT now lives in a separate deploy
-project.
+## Why
+
+- **One place for many providers**: OpenAI, Anthropic, Google/Gemini, DeepSeek,
+  OpenRouter… switch freely in a single UI.
+- **Persistent, multi-device**: conversations/users/config live in PostgreSQL, not
+  browser-local — sign in elsewhere and everything syncs.
+- **Knowledge base / RAG**: PGVector retrieval; upload documents and ask over them.
+- **Attachments & images**: S3-compatible storage (RustFS) with direct browser
+  upload, so large files don't slow the chat.
+- **Web search**: built-in SearXNG (privacy-respecting metasearch).
+- **Multi-user + access control**: email-allowlist sign-up; a server-side shared
+  key pool plus per-user BYOK.
+- **Self-hosted & portable**: copy `/opt/lobehub` + `.env` + backups to rebuild elsewhere.
 
 ## Architecture
 
@@ -31,6 +38,15 @@ LobeHub (on the server)
 LobeHub uses host networking so `S3_ENDPOINT` is reachable by both the LobeHub
 server and the browser through the tunnel. All data services bind to `127.0.0.1`
 only and open no public ports — the Cloudflare Tunnel is the single ingress.
+
+| Component | Role |
+|---|---|
+| **LobeHub** | Front-end UI + server/API main app |
+| **PostgreSQL / PGVector** | Persists conversations, users, config; vector search for the knowledge base |
+| **Redis** | Cache, sessions, background-task state |
+| **RustFS (S3-compatible)** | Object storage for uploaded files/images, with direct browser upload |
+| **SearXNG** | Web search (privacy-respecting metasearch) |
+| **Cloudflare Tunnel (optional)** | Public access: no open ports, TLS at the edge, faster first paint |
 
 ## Suitable For
 
